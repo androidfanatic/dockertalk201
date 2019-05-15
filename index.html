@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Docker 201</title>
+    <title>Docker 301</title>
     <meta charset="utf-8">
     <style>
       @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
@@ -23,7 +23,7 @@
 
 class: center, middle
 
-# Docker 201
+# Docker 301
 
 ---
 
@@ -31,263 +31,19 @@ class: center, middle
 
 Self: 
 - Manish Raj <manish_raj@outlook.com>
-- Tech: techramblings.bitbucket.io
-- Fun: instagram.com/geek.manish 
-
-Session:
-- Introduction to docker - intermediate
-- Not hands-on
-- Verbose, focusing on Docker CE
-- Interactive
 
 ---
 
-# Agenda
-
-1. Virtualization vs Containerization
-2. Why use docker
-3. Docker basics
-4. Running a docker container
-5. Building a docker image
-6. Publishing your docker image
-7. Common docker operations
-8. Questions
-9. Something to explore
+Image size, alpine
 
 ---
 
-# Containerization
-
-- OS level virtualization
-- Single kernal instance
-- Control groups + namespaces = multiple isolated user spaces
-- COW union file system: AUFS
-
-#### Virtualization vs Containerization
-
-<img src="https://cdn.smarthomebeginner.com/images/2016/11/Docker-vs-Virtual-Machines.png" style="max-width: 100%;" />
+Image registry, tags, private registry
 
 ---
 
-# Why use docker
+Multi-staged builds
 
-- The usual benefits:
-      - portable, run on any docker host
-      - built-in version tracking: 
-        build and commit have unique commit hashes
-      - re-usable components: images, layers
-      - public registry with tons of free-to-use images
-
-- More benefits:
-      - Strictly reproducible environments:
-          - helps with running integration tests in exact env as prod
-          - helps with debugging, setting up local dev envs quickly
-      - Speed and performance compared to virtual machines
-      - Ability to create multi-tier docker applications
-      - Scalable, rapid deployments used: swarm, compose, kubernetes
-      - Set memory, resource constraints, limit capabilities like IPC
-
----
-
-# Docker basics
-
-- Basic terminology
-  - Docker host: computer on which docker is running
-
-  - Docker daemon + Docker CLI: 
-      - Client server architecture
-      - Don't need to be on same machine
-      - Client issues commands
-      - Daemon servers those commands
-      - Rest API at unix:///var/run/docker.sock (https://docs.docker.com/engine/api/v1.24/)
-      - This is how docker works on Windows and MacOS
-
----
-
-### Docker CLI + Docker Daemon
-
-<img src="https://nickjanetakis.com/assets/blog/docker-client-host-registry-fc0858b5191e042ce19437fd6b52ba214d1e429bf646374f633598ebaac1a4ab.jpg" style="max-width: 100%" />
-
----
-
-## Docker basics (contd.)
-
-  - Image: 
-    - Snapshot or blueprint
-    - Composed of layers
-    - Parent layers are shared, reduces disk usage
-    - Once image is built - layers of the image are immutable
-    - Images can have tag
-    - Images can be pulled and pushed
-
-  - Container: 
-      - Instance of docker image
-      - Can be started, stopped, terminated and committed
-      - Multiple docker-containers can be linked to create a tiered docker architecture
-
----
-
-## Docker basics (contd.)
-    - Volumes:
-        - Share branches of host filesystem with running container
-        - COW
-  
-    - Dockerfile: set of instructions to build an image
-    - Docker Repository: a host for docker images
-    - Docker registry: host for docker repo where images can be pushed and pulled from
-    - Docker compose: A tool to orchestration creation and lifecycle of multiple docker containers
-
----
-
-# Running a docker container
-
-Run a hello-world container:
-
-`docker run hello-world`
-
-### With more options:
-
-Run Jenkins:
-
-`docker run --name jenkins --restart always -d -p 9999:8080 jenkins/jenkins:lts-alpine`
-
-Discuss:
- - Options, repo
- - Ease of running something like Jenkins
-
----
-
-# Building a docker image
-
-Dockerfile
-
-```
-FROM alpine:3.1
-
-# Update
-
-RUN apk add --update nodejs
-
-# Install app dependencies
-
-COPY package.json /src/package.json
-
-RUN cd /src; npm install
-
-# Bundle app source
-
-COPY . /src
-
-EXPOSE  8080
-
-CMD ["node", "/src/index.js"]
-```
-
----
-
-### Building a docker image (contd.)
-
-1. `docker build -t nodeapp:v1 .`
-2. `docker build -t nodeapp:latest .`
-3. `docker build -t nodeapp .`
-
-And run:
-
-1. `docker run nodeapp:v1`
-2. `docker run nodeapp:latest`
-3. `docker run nodeapp`
-
-### Run with ports exposed:
-
-`docker run -p 8080:8080 nodeapp`
-
----
-
-# Publishing your docker image
-
-- Default docker registry is at https://hub.docker.com:
-- Signup if not already.
-
-1. `docker login`
-2. `docker tag nodeapp rajmanish/sample-nodeapp:v1`
-3. `docker push rajmanish/sample-nodeapp:v1`
-
-Some notes:
-
-- Tags are optional
-- Default tag is "latest" for both pull and push operations
-- A docker repository on hub.docker.com can be public or private
-- Public images are accessible to everyone
-- Only one private repo for free users
-- For CI/CD or storing nightly docker image builds, you can run own registry instead of using the docker-hub registry
-
----
-
-# Common docker operations
-
-- docker ps: list containers
-- docker logs: get container logs
-- docker inspect: inspect container/resources
-- docker exec: run command within a container
-- docker attach: attach to running container
-- docker kill: kill a container
-- docker pause: pause a container
-- docker port: show ports allocated to a container
-- docker top: show top processes running in a container
-- docker commit: create image from a running container
-- docker save|load: save|load image to a tar file
-- docker search: search for registry
-- docker volume create: create a volume
-
-Cheatsheet at: https://github.com/wsargent/docker-cheat-sheet
-
----
-
-## Common docker operations (contd.)
-
-### Networking in docker:
-
-- Modes: 
-    - bridge (default)
-    - host
-    - none
-
----
-
-## Common docker operations (contd.)
-
-### Docker compose
-
-Possibilities:
-
-- Orchestrate multi-container docker applications
-- YAML driven way of doing what you can achieve with docker-CLI and some bash scripts
-- More organized and preferred for multi-container docker setups
-- You do not always need a docker-compose file
-- Current compose spec v3: https://devhints.io/docker-compose
-
-Commands:
-
-1. `docker-compose start|stop`
-2. `docker-compose pause|unpause`
-3. `docker-compose ps`
-4. `docker-compose up|down` - re-creates containers
-
----
-class: center, middle
-
-# Questions?
-
----
-
-## Something to explore:
-
-- Docker networking
-- Docker volume
-- Docker-compose YAML spec
-- Setting constraints on docker containers
-
-## Thank you
 
 </textarea>
     <script src="https://remarkjs.com/downloads/remark-latest.min.js">
