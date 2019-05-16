@@ -5,15 +5,13 @@
     <meta charset="utf-8">
     <style>
       @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
-      @import url(https://fonts.googleapis.com/css?family=Indie+Flower);
 
       * {
-        font-family: 'Indie Flower';
+        font-family: 'Ubuntu Mono'; 
         font-weight: normal;
       }
 
       .remark-code, .remark-inline-code { 
-        font-family: 'Ubuntu Mono'; 
         background: #eeeeee;
       }
     </style>
@@ -34,7 +32,11 @@ Self:
 
 ---
 
-Image size, alpine
+Dockerfile
+
+- always use alpine or slim variant for production to keep image size small
+- use a .dockerignore file to trim down build context
+- 
 
 ---
 
@@ -44,6 +46,36 @@ Image registry, tags, private registry
 
 Multi-staged builds
 
+Why?
+
+- reduce image size
+- avoid the builder pattern
+
+- use multiple FROM statements in Dockerfile
+- enables using multiple base images in a single Dockerfile
+
+- Example of multi-stage docker files:
+
+```
+# stage 0
+FROM golang:1.7.3 AS builder
+WORKDIR /go/src/github.com/alexellis/href-counter/
+RUN go get -d -v golang.org/x/net/html  
+COPY app.go    .
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .
+
+# stage 1
+FROM alpine:latest  
+RUN apk --no-cache add ca-certificates
+WORKDIR /root/
+COPY --from=builder /go/src/github.com/alexellis/href-counter/app .
+CMD ["./app"]  
+```
+
+
+```
+docker build --target <stage-name> -t <tag>
+```
 
 </textarea>
     <script src="https://remarkjs.com/downloads/remark-latest.min.js">
